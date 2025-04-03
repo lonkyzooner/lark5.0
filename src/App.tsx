@@ -19,7 +19,7 @@ const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ defa
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
 const Tools = lazy(() => import('./components/Tools').then(module => ({ default: module.Tools })));
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const DashboardOverview = lazy(() => import('./components/DashboardOverview'));
+const DashboardOverviewFixed = lazy(() => import('./components/DashboardOverviewFixed'));
 import { LiveKitVoiceProvider } from './contexts/LiveKitVoiceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import MirandaErrorBoundary from './components/MirandaErrorBoundary';
@@ -314,17 +314,27 @@ function App({ initialTab = 'voice' }: AppProps) {
                 <ErrorBoundary
                   onError={(error, errorInfo) => {
                     console.error('Dashboard Error:', error);
+                    console.error('Error Message:', error.message);
                     console.error('Component Stack:', errorInfo.componentStack);
+                    // Log additional details that might help debugging
+                    console.error('Error Name:', error.name);
+                    console.error('Error Stack:', error.stack);
                   }}
                   fallback={
                     <div className="p-6 text-center">
-                      <p className="text-red-500 mb-2">There was an error loading the dashboard.</p>
-                      <Button onClick={() => window.location.reload()}>Reload</Button>
+                      <h2 className="text-xl font-semibold text-red-600 mb-3">Dashboard Error</h2>
+                      <p className="text-red-500 mb-4">There was an error loading the dashboard.</p>
+                      <div className="bg-red-50 p-4 rounded-md mb-4 text-left">
+                        <p className="text-sm text-red-700">Please check the console for detailed error information.</p>
+                      </div>
+                      <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700 text-white">
+                        Reload Application
+                      </Button>
                     </div>
                   }
                 >
                   <Suspense fallback={<div className="p-8 text-center">Loading dashboard...</div>}>
-                    <DashboardOverview />
+                    <DashboardOverviewFixed />
                   </Suspense>
                 </ErrorBoundary>
               </TabsContent>
