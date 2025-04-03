@@ -10,7 +10,7 @@ import {
   Users
 } from 'lucide-react';
 
-export const DashboardOverview: React.FC = () => {
+const DashboardOverview: React.FC = () => {
   // Use our custom hook to get the user's display name and greeting
   const { displayName, getGreeting } = useUserDisplayName();
 
@@ -39,28 +39,28 @@ export const DashboardOverview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <Button 
+              <Button
                 className="w-full justify-start bg-gradient-to-r from-[#002166] to-[#0046c7] text-white"
                 onClick={() => navigateToTab('miranda')}
               >
                 <Shield className="h-4 w-4 mr-2" />
                 Miranda Rights
               </Button>
-              <Button 
+              <Button
                 className="w-full justify-start bg-gradient-to-r from-[#002166] to-[#0046c7] text-white"
                 onClick={() => navigateToTab('reports')}
               >
                 <FileText className="h-4 w-4 mr-2" />
                 New Report
               </Button>
-              <Button 
+              <Button
                 className="w-full justify-start bg-gradient-to-r from-[#002166] to-[#0046c7] text-white"
                 onClick={() => navigateToTab('statutes')}
               >
                 <Shield className="h-4 w-4 mr-2" />
                 Statute Lookup
               </Button>
-              <Button 
+              <Button
                 className="w-full justify-start bg-gradient-to-r from-[#002166] to-[#0046c7] text-white"
                 onClick={() => navigateToTab('voice')}
               >
@@ -121,4 +121,6 @@ export const DashboardOverview: React.FC = () => {
   );
 };
 
+// Add both named and default exports for compatibility
+export { DashboardOverview };
 export default DashboardOverview;

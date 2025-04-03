@@ -19,7 +19,7 @@ const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ defa
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
 const Tools = lazy(() => import('./components/Tools').then(module => ({ default: module.Tools })));
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const DashboardOverview = lazy(() => import('./components/DashboardOverview').then(module => ({ default: module.DashboardOverview })));
+const DashboardOverview = lazy(() => import('./components/DashboardOverview'));
 import { LiveKitVoiceProvider } from './contexts/LiveKitVoiceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import MirandaErrorBoundary from './components/MirandaErrorBoundary';
