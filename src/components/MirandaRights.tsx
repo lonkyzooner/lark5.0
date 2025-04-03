@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveKitVoice } from '../hooks/useLiveKitVoice';
+import { useWebSpeech } from '../hooks/useWebSpeech';
 import { Button } from './ui/button';
 import {
   Select,
@@ -48,7 +49,15 @@ const languageFlags = {
 
 export function MirandaRights() {
   const [selectedLanguage, setSelectedLanguage] = useState<keyof typeof languages>('english');
-  const { speak, isSpeaking: speaking, stopSpeaking: stop, error } = useLiveKitVoice();
+  const { speak: liveKitSpeak, isSpeaking: liveKitSpeaking, stopSpeaking: liveKitStop, error: liveKitError } = useLiveKitVoice();
+  const { speak: webSpeak, isSpeaking: webSpeaking, stopSpeaking: webStop, error: webError, isSupported: speechSupported } = useWebSpeech();
+
+  // Use the appropriate speech system based on availability
+  const speak = speechSupported ? webSpeak : liveKitSpeak;
+  const speaking = speechSupported ? webSpeaking : liveKitSpeaking;
+  const stop = speechSupported ? webStop : liveKitStop;
+  const error = speechSupported ? webError : liveKitError;
+
   const [playbackStatus, setPlaybackStatus] = useState<'idle' | 'playing' | 'complete'>('idle');
   const [readToSuspect, setReadToSuspect] = useState(false);
 
@@ -201,12 +210,33 @@ export function MirandaRights() {
         }
       }));
 
-      // Use LiveKit Voice API with 'ash' voice for all speech output
+      // Use Web Speech API or LiveKit Voice API depending on availability
       try {
-        await speak(mirandaText[selectedLanguage], 'ash');
-        console.log('Miranda rights TTS with LiveKit completed successfully');
+        if (speechSupported) {
+          // Use Web Speech API with appropriate voice
+          await speak(mirandaText[selectedLanguage], 'male', () => {
+            console.log('Web Speech API completed successfully');
+            setPlaybackStatus('complete');
+            setReadToSuspect(true);
+
+            // Dispatch event to notify other components that Miranda rights were read
+            document.dispatchEvent(new CustomEvent('mirandaRightsRead', {
+              detail: {
+                language: selectedLanguage,
+                timestamp: Date.now(),
+                success: true,
+                webSpeech: true
+              }
+            }));
+          });
+          return; // Exit early since the callback will handle completion
+        } else {
+          // Fallback to LiveKit Voice API
+          await speak(mirandaText[selectedLanguage], 'ash');
+          console.log('Miranda rights TTS with LiveKit completed successfully');
+        }
       } catch (speakError) {
-        console.error('LiveKit TTS method failed:', speakError);
+        console.error('Speech synthesis failed:', speakError);
         throw speakError; // Re-throw to be handled by the parent catch
       }
 
@@ -325,11 +355,24 @@ export function MirandaRights() {
             </div>
           )}
 
-          <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md mb-2">
+          <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md mb-2 relative">
+            {speaking && (
+              <div className="absolute top-2 right-2 flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-full text-xs animate-pulse">
+                <span className="inline-block w-2 h-2 bg-white rounded-full animate-ping"></span>
+                Speaking...
+              </div>
+            )}
             <p className="text-sm text-blue-700 leading-relaxed">
               {mirandaText[selectedLanguage]}
             </p>
           </div>
+
+          {speechSupported && (
+            <div className="text-xs text-green-600 flex items-center gap-1 mb-2">
+              <CheckCircle2 className="h-3 w-3" />
+              Web Speech API available for audio playback
+            </div>
+          )}
 
         <div className="flex flex-wrap items-center gap-4 mt-2">
           <div className="relative flex-grow max-w-[280px]">

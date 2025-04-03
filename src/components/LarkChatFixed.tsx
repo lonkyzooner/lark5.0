@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useContext, useMemo } 
 import '../styles/chat-fix.css';
 import VoiceContext from '../contexts/VoiceContext';
 import LiveKitVoiceContext from '../contexts/LiveKitVoiceContext';
+import { useWebSpeech } from '../hooks/useWebSpeech';
 import { useSettings } from '../lib/settings-store';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -42,7 +43,7 @@ const MessageBubble = React.memo(({ message, onSpeakText }: { message: Message, 
           <div className="whitespace-pre-wrap text-[15px]">{message.content}</div>
           <div className="flex justify-between items-center mt-2">
             <span className="text-xs opacity-70">{formattedTime}</span>
-            
+
             {message.role === 'assistant' && (
               <TooltipProvider>
                 <Tooltip>
@@ -79,6 +80,7 @@ MessageBubble.displayName = 'MessageBubble';
 export const LarkChatFixed: React.FC = () => {
   const voice = useContext(VoiceContext);
   const liveKitVoice = useContext(LiveKitVoiceContext);
+  const webSpeech = useWebSpeech();
   const { getOfficerName, getOfficerRank, getOfficerCodename } = useSettings();
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -100,12 +102,12 @@ export const LarkChatFixed: React.FC = () => {
     // Add welcome message
     const welcomeMessage = {
       role: 'assistant' as const,
-      content: offlineMode 
+      content: offlineMode
         ? "Welcome to LARK Assistant. I'm currently operating in offline mode with limited functionality. I can still help with basic tasks and information."
         : "Welcome to LARK Assistant. How can I help you today?",
       timestamp: Date.now()
     };
-    
+
     setMessages([welcomeMessage]);
     setIsInitialized(true);
 
@@ -143,15 +145,15 @@ export const LarkChatFixed: React.FC = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!input.trim()) return;
-    
+
     const userMessage = {
       role: 'user' as const,
       content: input,
       timestamp: Date.now()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsProcessing(true);
@@ -165,9 +167,9 @@ export const LarkChatFixed: React.FC = () => {
           content: "To access Miranda Rights, please use the dedicated Miranda tab for the most reliable experience. You can click on the 'Go to Miranda Tab' button below or select it from the navigation menu.",
           timestamp: Date.now()
         };
-        
+
         setMessages(prev => [...prev, assistantResponse]);
-        
+
         // Show info message with direct link
         setInfo("For Miranda Rights, use the dedicated Miranda tab for best results.");
         setTimeout(() => setInfo(null), 5000);
@@ -207,15 +209,28 @@ export const LarkChatFixed: React.FC = () => {
   // Handle speaking text
   const handleSpeakText = (text: string) => {
     if (isSpeaking) {
-      liveKitVoice.stopSpeaking();
+      // Stop speaking using the appropriate API
+      if (webSpeech.isSupported) {
+        webSpeech.stopSpeaking();
+      } else {
+        liveKitVoice.stopSpeaking();
+      }
       setIsSpeaking(false);
       return;
     }
 
     setIsSpeaking(true);
-    liveKitVoice.speak(text, () => {
-      setIsSpeaking(false);
-    });
+
+    // Use Web Speech API if supported, otherwise fall back to LiveKit
+    if (webSpeech.isSupported) {
+      webSpeech.speak(text, 'male', () => {
+        setIsSpeaking(false);
+      });
+    } else {
+      liveKitVoice.speak(text, () => {
+        setIsSpeaking(false);
+      });
+    }
   };
 
   // Render the chat interface
@@ -402,8 +417,8 @@ export const LarkChatFixed: React.FC = () => {
                   mirandaTabTrigger.click();
                 } else {
                   // Fallback using custom event
-                  document.dispatchEvent(new CustomEvent('changeTab', { 
-                    detail: { tabId: 'miranda' } 
+                  document.dispatchEvent(new CustomEvent('changeTab', {
+                    detail: { tabId: 'miranda' }
                   }));
                 }
               } catch (error) {
