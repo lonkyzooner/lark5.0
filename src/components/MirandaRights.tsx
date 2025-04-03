@@ -52,6 +52,28 @@ export function MirandaRights() {
   const [playbackStatus, setPlaybackStatus] = useState<'idle' | 'playing' | 'complete'>('idle');
   const [readToSuspect, setReadToSuspect] = useState(false);
 
+  // Check for offline mode
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  useEffect(() => {
+    // Check if we're in offline mode
+    const apiKeyMissing = !import.meta.env.VITE_OPENAI_API_KEY;
+    setIsOfflineMode(apiKeyMissing || !navigator.onLine);
+
+    // Set up network status monitoring
+    const handleNetworkChange = () => {
+      setIsOfflineMode(apiKeyMissing || !navigator.onLine);
+    };
+
+    window.addEventListener('online', handleNetworkChange);
+    window.addEventListener('offline', handleNetworkChange);
+
+    return () => {
+      window.removeEventListener('online', handleNetworkChange);
+      window.removeEventListener('offline', handleNetworkChange);
+    };
+  }, []);
+
   // Listen for triggerMiranda events and fallback speech events
   useEffect(() => {
     const handleTriggerMiranda = (event: CustomEvent) => {
@@ -163,6 +185,7 @@ export function MirandaRights() {
       // Add additional logging for debugging
       console.log(`Using language: ${selectedLanguage} (${languages[selectedLanguage]})`);
       console.log(`Text length: ${mirandaText[selectedLanguage].length} characters`);
+      console.log(`Offline mode: ${isOfflineMode}`);
 
       // Verify we have valid text before proceeding
       if (!mirandaText[selectedLanguage] || mirandaText[selectedLanguage].length < 10) {
@@ -173,7 +196,8 @@ export function MirandaRights() {
       document.dispatchEvent(new CustomEvent('mirandaRightsPlaying', {
         detail: {
           language: selectedLanguage,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          offlineMode: isOfflineMode
         }
       }));
 
@@ -201,12 +225,35 @@ export function MirandaRights() {
       console.error("Error playing Miranda rights:", err);
       setPlaybackStatus('idle');
 
-      // Notify about the error
+      // Special handling for offline mode
+      if (isOfflineMode) {
+        console.log('Offline mode detected during error, providing text-only fallback');
+
+        // In offline mode, we'll still mark it as complete but notify about offline mode
+        setPlaybackStatus('complete');
+        setReadToSuspect(true);
+
+        // Dispatch event to notify other components that Miranda rights were displayed (not read)
+        document.dispatchEvent(new CustomEvent('mirandaRightsRead', {
+          detail: {
+            language: selectedLanguage,
+            timestamp: Date.now(),
+            success: true,
+            offlineMode: true,
+            textOnly: true
+          }
+        }));
+
+        return; // Exit early with success in offline mode
+      }
+
+      // Notify about the error for online mode
       document.dispatchEvent(new CustomEvent('mirandaRightsError', {
         detail: {
           language: selectedLanguage,
           timestamp: Date.now(),
-          error: err instanceof Error ? err.message : 'Unknown error'
+          error: err instanceof Error ? err.message : 'Unknown error',
+          offlineMode: isOfflineMode
         }
       }));
 
@@ -264,6 +311,20 @@ export function MirandaRights() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {isOfflineMode && (
+            <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-md mb-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-amber-800 mb-1">Offline Mode</h4>
+                  <p className="text-sm text-amber-700">
+                    You are currently in offline mode. Miranda Rights text is available, but audio playback may be limited.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md mb-2">
             <p className="text-sm text-blue-700 leading-relaxed">
               {mirandaText[selectedLanguage]}

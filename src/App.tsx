@@ -14,6 +14,7 @@ import LarkLogo from './components/LarkLogo';
 // Lazy load larger components
 // Use named import for LarkChat to avoid TypeScript issues
 import { LarkChat } from './components/LarkChat';
+import LarkChatFixed from './components/LarkChatFixed';
 const MirandaRights = lazy(() => import('./components/MirandaRights').then(module => ({ default: module.MirandaRights })));
 const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ default: module.RSCodes })));
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
@@ -355,23 +356,9 @@ function App({ initialTab = 'voice' }: AppProps) {
                     </div>
                   }
                 >
-                  <MirandaErrorBoundary
-                    onMirandaError={(error) => {
-                      console.error('Miranda functionality error:', error);
-                      // Try to dispatch a fallback event to ensure Miranda rights can still be triggered
-                      try {
-                        document.dispatchEvent(new CustomEvent('mirandaErrorRecovery', {
-                          detail: { timestamp: Date.now() }
-                        }));
-                      } catch (e) {
-                        console.error('Failed to dispatch recovery event:', e);
-                      }
-                    }}
-                  >
-                    <Suspense fallback={<div className="p-8 text-center">Loading voice assistant...</div>}>
-                      <LarkChat />
-                    </Suspense>
-                  </MirandaErrorBoundary>
+                  <Suspense fallback={<div className="p-8 text-center">Loading voice assistant...</div>}>
+                    <LarkChatFixed />
+                  </Suspense>
                 </ErrorBoundary>
               </TabsContent>
 
