@@ -17,28 +17,44 @@ interface State {
 class MirandaErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { 
+    this.state = {
       hasError: false,
       error: null
     };
   }
 
+  componentDidMount() {
+    // Add event listener for Miranda error recovery
+    document.addEventListener('mirandaErrorRecovery', this.handleRecovery);
+  }
+
+  componentWillUnmount() {
+    // Remove event listener
+    document.removeEventListener('mirandaErrorRecovery', this.handleRecovery);
+  }
+
+  handleRecovery = () => {
+    if (this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
   static getDerivedStateFromError(error: Error): State {
-    return { 
+    return {
       hasError: true,
-      error 
+      error
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('Miranda functionality error:', error);
     console.error('Component stack:', errorInfo.componentStack);
-    
+
     // Notify parent component about the error
     if (this.props.onMirandaError) {
       this.props.onMirandaError(error);
     }
-    
+
     // Set user-friendly error message
     this.setState({
       hasError: true,
@@ -54,7 +70,17 @@ class MirandaErrorBoundary extends Component<Props, State> {
           <p className="text-amber-600 mb-2">{this.state.error?.message}</p>
           <div className="flex space-x-2">
             <button
-              onClick={() => this.setState({ hasError: false, error: null })}
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                // Try to dispatch a recovery event
+                try {
+                  document.dispatchEvent(new CustomEvent('mirandaErrorRecovery', {
+                    detail: { timestamp: Date.now() }
+                  }));
+                } catch (e) {
+                  console.error('Failed to dispatch recovery event:', e);
+                }
+              }}
               className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
             >
               Try Again
