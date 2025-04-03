@@ -238,16 +238,24 @@ export const LarkChatFixed: React.FC = () => {
     <div className="chat-container">
       {/* Error message */}
       {error && (
-        <div className="error-message mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="error-message mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2"
+        >
+          <AlertCircle className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Info message */}
       {info && (
-        <div className="info-message mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 flex items-center gap-2">
-          <Info className="h-5 w-5 flex-shrink-0" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="info-message mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 flex items-center gap-2"
+        >
+          <Info className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           <span>{info}</span>
         </div>
       )}
@@ -264,8 +272,12 @@ export const LarkChatFixed: React.FC = () => {
 
       {/* Loading indicator */}
       {isProcessing && (
-        <div className="flex justify-center my-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#002166] border-t-2 border-t-[#0046c7]/30 shadow-md"></div>
+        <div className="flex justify-center my-4" role="status" aria-live="polite">
+          <div
+            className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#002166] border-t-2 border-t-[#0046c7]/30 shadow-md"
+            aria-hidden="true"
+          ></div>
+          <span className="sr-only">Loading...</span>
         </div>
       )}
 
@@ -273,17 +285,20 @@ export const LarkChatFixed: React.FC = () => {
       <form onSubmit={handleSubmit} className="mt-4">
         <div className="flex gap-2">
           <div className="relative flex-1">
+            <label htmlFor="chat-input" className="sr-only">Type your message</label>
             <Input
+              id="chat-input"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               disabled={isProcessing}
+              aria-disabled={isProcessing}
               className="flex-1 text-black border-white/50 focus:border-[#002166] focus:ring-[#002166] rounded-full py-6 pl-12 pr-5 shadow-md bg-white/95 backdrop-blur-lg transition-all duration-300 hover:shadow-lg"
             />
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
               <Badge variant="outline" className="bg-blue-50 text-[#002166] border-blue-200">
-                <MessageSquare className="h-4 w-4" />
+                <MessageSquare className="h-4 w-4" aria-hidden="true" />
               </Badge>
             </div>
           </div>
@@ -295,9 +310,10 @@ export const LarkChatFixed: React.FC = () => {
                 <Button
                   type="submit"
                   disabled={isProcessing || !input.trim()}
+                  aria-label="Send message"
                   className="bg-gradient-to-r from-[#002166] to-[#0046c7] text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 >
-                  <SendIcon className="h-5 w-5" />
+                  <SendIcon className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -314,9 +330,10 @@ export const LarkChatFixed: React.FC = () => {
                   <Button
                     type="button"
                     onClick={() => handleSpeakText('')}
+                    aria-label="Stop speaking"
                     className="bg-red-500 text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                   >
-                    <StopCircleIcon className="h-5 w-5" />
+                    <StopCircleIcon className="h-5 w-5" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -339,9 +356,10 @@ export const LarkChatFixed: React.FC = () => {
                         handleSpeakText(lastAssistantMessage.content);
                       }
                     }}
+                    aria-label="Speak last message"
                     className="border-white/50 hover:bg-white/80 transition-all duration-300 rounded-full shadow-md hover:shadow-lg transform hover:scale-105"
                   >
-                    <VolumeIcon className="h-5 w-5" />
+                    <VolumeIcon className="h-5 w-5" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -380,20 +398,22 @@ export const LarkChatFixed: React.FC = () => {
                     }
                   }}
                   disabled={!isOnline}
+                  aria-label={voice.isListening ? "Stop voice input" : voice.micPermission === 'denied' ? "Microphone access denied" : "Start voice input"}
+                  aria-pressed={voice.isListening}
                 >
                   {voice.isListening ? (
                     <div className="relative">
-                      <div className="absolute inset-0 bg-green-400/30 rounded-full animate-ping opacity-75"></div>
-                      <div className="absolute inset-0 bg-green-300/30 rounded-full animate-pulse opacity-50"></div>
-                      <Mic className="h-5 w-5 text-green-600 relative z-10" />
+                      <div className="absolute inset-0 bg-green-400/30 rounded-full animate-ping opacity-75" aria-hidden="true"></div>
+                      <div className="absolute inset-0 bg-green-300/30 rounded-full animate-pulse opacity-50" aria-hidden="true"></div>
+                      <Mic className="h-5 w-5 text-green-600 relative z-10" aria-hidden="true" />
                     </div>
                   ) : voice.micPermission === 'denied' ? (
                     <div className="relative">
-                      <MicOff className="h-5 w-5 text-red-500 relative z-10" />
+                      <MicOff className="h-5 w-5 text-red-500 relative z-10" aria-hidden="true" />
                     </div>
                   ) : (
                     <div className="relative">
-                      <Mic className="h-5 w-5 text-[#002166] relative z-10" />
+                      <Mic className="h-5 w-5 text-[#002166] relative z-10" aria-hidden="true" />
                     </div>
                   )}
                 </Button>
@@ -426,6 +446,7 @@ export const LarkChatFixed: React.FC = () => {
               }
             }}
             className="bg-gradient-to-r from-[#002166] to-[#0046c7] text-white"
+            aria-label="Navigate to Miranda Rights tab"
           >
             Go to Miranda Tab
           </Button>
@@ -433,7 +454,7 @@ export const LarkChatFixed: React.FC = () => {
       )}
 
       {isProcessing && (
-        <div className="text-center text-sm text-gray-500 mt-2">
+        <div className="text-center text-sm text-gray-500 mt-2" aria-live="polite">
           <div className="inline-block animate-pulse">Processing your request...</div>
         </div>
       )}

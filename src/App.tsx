@@ -12,19 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import LarkLogo from './components/LarkLogo';
 
 // Lazy load larger components
-// Use named import for LarkChat to avoid TypeScript issues
-import { LarkChat } from './components/LarkChat';
+// Only import what we're actually using
 import LarkChatFixed from './components/LarkChatFixed';
 const MirandaRights = lazy(() => import('./components/MirandaRights').then(module => ({ default: module.MirandaRights })));
 const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ default: module.RSCodes })));
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
 const Tools = lazy(() => import('./components/Tools').then(module => ({ default: module.Tools })));
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const FluidDesignDemo = lazy(() => import('./components/FluidDesignDemo').then(module => ({ default: module.FluidDesignDemo })));
-// LiveKitRealtimeVoiceTest import removed
-const AdvancedDashboard = lazy(() => import('./components/AdvancedDashboard').then(module => ({ default: module.AdvancedDashboard })));
 const DashboardOverview = lazy(() => import('./components/DashboardOverview').then(module => ({ default: module.DashboardOverview })));
-const VoiceAssistantPanel = lazy(() => import('./components/VoiceAssistantPanel'));
 import { LiveKitVoiceProvider } from './contexts/LiveKitVoiceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import MirandaErrorBoundary from './components/MirandaErrorBoundary';
@@ -32,20 +27,17 @@ import { initNetworkMonitoring } from './utils/networkOptimizer';
 import initializePerformanceOptimizations from './utils/performanceOptimizer';
 import { initLocationTracking, getCurrentLocation, onLocationUpdate, LocationData } from './utils/locationTracker';
 import {
-  ShieldIcon,
   BookTextIcon,
   AlertTriangleIcon,
   MicIcon,
   Activity,
-  Radio,
   BatteryMedium,
   Clock,
   MapPin,
   WifiIcon,
   CheckCircle2,
   WrenchIcon,
-  Settings as SettingsIcon,
-  Volume as VolumeUpIcon
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 interface AppProps {
