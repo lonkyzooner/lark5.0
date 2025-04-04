@@ -19,7 +19,7 @@ const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ defa
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
 const Tools = lazy(() => import('./components/Tools').then(module => ({ default: module.Tools })));
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const DashboardOverviewFixed = lazy(() => import('./components/DashboardOverviewFixed'));
+const SimpleLarkDashboard = lazy(() => import('./components/SimpleLarkDashboard'));
 import { LiveKitVoiceProvider } from './contexts/LiveKitVoiceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import MirandaErrorBoundary from './components/MirandaErrorBoundary';
@@ -334,7 +334,7 @@ function App({ initialTab = 'voice' }: AppProps) {
                   }
                 >
                   <Suspense fallback={<div className="p-8 text-center">Loading dashboard...</div>}>
-                    <DashboardOverviewFixed />
+                    <SimpleLarkDashboard />
                   </Suspense>
                 </ErrorBoundary>
               </TabsContent>
