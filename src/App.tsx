@@ -19,7 +19,7 @@ const RSCodes = lazy(() => import('./components/RSCodes').then(module => ({ defa
 const ThreatDetection = lazy(() => import('./components/ThreatDetection').then(module => ({ default: module.ThreatDetection })));
 const Tools = lazy(() => import('./components/Tools').then(module => ({ default: module.Tools })));
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const SimpleLarkDashboard = lazy(() => import('./components/SimpleLarkDashboard'));
+// Dashboard is now implemented directly in App.tsx
 import { LiveKitVoiceProvider } from './contexts/LiveKitVoiceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import MirandaErrorBoundary from './components/MirandaErrorBoundary';
@@ -29,7 +29,7 @@ import { initLocationTracking, getCurrentLocation, onLocationUpdate, LocationDat
 import {
   BookTextIcon,
   AlertTriangleIcon,
-  MicIcon,
+  MicIcon as Mic,
   Activity,
   BatteryMedium,
   Clock,
@@ -37,7 +37,8 @@ import {
   WifiIcon,
   CheckCircle2,
   WrenchIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Shield
 } from 'lucide-react';
 
 interface AppProps {
@@ -333,9 +334,65 @@ function App({ initialTab = 'voice' }: AppProps) {
                     </div>
                   }
                 >
-                  <Suspense fallback={<div className="p-8 text-center">Loading dashboard...</div>}>
-                    <SimpleLarkDashboard />
-                  </Suspense>
+                  <div className="p-6 max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                      <h1 className="text-3xl font-bold text-blue-900">
+                        {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 18 ? "Good afternoon" : "Good evening"}, Officer
+                      </h1>
+                      <p className="text-gray-600 mt-1">Welcome to your LARK dashboard</p>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="mb-8">
+                      <h2 className="text-xl font-semibold mb-4 text-blue-800 flex items-center">
+                        <Clock className="mr-2 h-5 w-5" />
+                        Quick Actions
+                      </h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Button
+                          onClick={() => setActiveTab('voice')}
+                          className="h-auto py-4 flex flex-col items-center bg-gradient-to-r from-blue-900 to-blue-700"
+                        >
+                          <Mic className="h-6 w-6 mb-2" />
+                          <span>Voice Assistant</span>
+                        </Button>
+                        <Button
+                          onClick={() => setActiveTab('miranda')}
+                          className="h-auto py-4 flex flex-col items-center bg-gradient-to-r from-blue-900 to-blue-700"
+                        >
+                          <Shield className="h-6 w-6 mb-2" />
+                          <span>Miranda Rights</span>
+                        </Button>
+                        <Button
+                          onClick={() => setActiveTab('statutes')}
+                          className="h-auto py-4 flex flex-col items-center bg-gradient-to-r from-blue-900 to-blue-700"
+                        >
+                          <BookTextIcon className="h-6 w-6 mb-2" />
+                          <span>Statutes</span>
+                        </Button>
+                        <Button
+                          onClick={() => setActiveTab('tools')}
+                          className="h-auto py-4 flex flex-col items-center bg-gradient-to-r from-blue-900 to-blue-700"
+                        >
+                          <WrenchIcon className="h-6 w-6 mb-2" />
+                          <span>Tools</span>
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Settings Link */}
+                    <div className="mt-8 text-center">
+                      <Button
+                        variant="outline"
+                        onClick={() => setActiveTab('settings')}
+                        className="inline-flex items-center"
+                      >
+                        <SettingsIcon className="h-4 w-4 mr-2" />
+                        <span>Open Settings</span>
+                      </Button>
+                    </div>
+                  </div>
                 </ErrorBoundary>
               </TabsContent>
 
